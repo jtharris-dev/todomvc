@@ -13,6 +13,9 @@ angular.module('todomvc')
 
 		$scope.newTodo = '';
 		$scope.editedTodo = null;
+		$scope.newSubTask = {
+			tite: ''
+		};
 
 		$scope.$watch('todos', function () {
 			$scope.remainingCount = $filter('filter')(todos, { completed: false }).length;
@@ -31,7 +34,9 @@ angular.module('todomvc')
 		$scope.addTodo = function () {
 			var newTodo = {
 				title: $scope.newTodo.trim(),
-				completed: false
+				completed: false,
+				displaySubTasks: false,
+				subTasks: []
 			};
 
 			if (!newTodo.title) {
@@ -52,6 +57,36 @@ angular.module('todomvc')
 			$scope.editedTodo = todo;
 			// Clone the original todo to restore it on demand.
 			$scope.originalTodo = angular.extend({}, todo);
+		};
+
+		$scope.showSubTasks = function (todo) {
+			if (todo.displaySubTasks == false) {
+				todo.displaySubTasks = true;
+			} else {
+				todo.displaySubTasks = false;
+			}
+		};
+
+		$scope.addSubtask = function (todo) {
+			var newSubTask = {
+				title: $scope.newSubTask.title.trim(),
+				completed: false,
+			};
+
+			todo.subTasks.push(newSubTask);
+
+			if (!newSubTask.title) {
+				return;
+			}
+
+			$scope.saving = true;
+			store.put(todo)
+				.then(function success() {
+					$scope.newSubTask.title = '';
+				})
+				.finally(function () {
+					$scope.saving = false;
+				});
 		};
 
 		$scope.saveEdits = function (todo, event) {
@@ -95,6 +130,10 @@ angular.module('todomvc')
 
 		$scope.removeTodo = function (todo) {
 			store.delete(todo);
+		};
+
+		$scope.removeTask = function (task, todo) {
+			todo.subTasks.splice(todo.subTasks.indexOf(task), 1);
 		};
 
 		$scope.saveTodo = function (todo) {
