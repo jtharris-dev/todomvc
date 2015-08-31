@@ -26,7 +26,25 @@
 							<div class="view">
 								<input class="toggle" type="checkbox" ng-model="todo.completed" ng-change="toggleCompleted(todo)">
 								<label ng-dblclick="editTodo(todo)">{{todo.title}}</label>
+								<label id="show-sub-tasks" ng-click="showSubTasks(todo)">Show Subtasks</label>
 								<button class="destroy" ng-click="removeTodo(todo)"></button>
+							</div>
+							<div ng-if="todo.displaySubTasks">
+								<form id="todo-form" ng-submit="addSubtask(todo)">
+									<input id="new-todo" placeholder="Enter a sub-task" ng-model="newSubTask.title" ng-disabled="saving" autofocus>
+								</form>
+								<ul id="task-list">
+									<li ng-repeat="task in todo.subTasks| filter:statusFilter track by $index" ng-class="{completed: task.completed, editing: task == editedTodo}">
+										<div class="view">
+											<input class="toggle" type="checkbox" ng-model="task.completed" ng-change="toggleCompleted(task)">
+											<label ng-dblclick="editTodo(task)">{{task.title}}</label>
+											<button class="destroy" ng-click="removeTask(task, todo)"></button>
+										</div>
+										<form ng-submit="saveEdits(task, 'submit')">
+											<input class="edit" ng-trim="false" ng-model="task.title" todo-escape="revertEdits(task)" ng-blur="saveEdits(task, 'blur')" todo-focus="task == editedTodo">
+										</form>
+								</li>
+								</ul>
 							</div>
 							<form ng-submit="saveEdits(todo, 'submit')">
 								<input class="edit" ng-trim="false" ng-model="todo.title" todo-escape="revertEdits(todo)" ng-blur="saveEdits(todo, 'blur')" todo-focus="todo == editedTodo">
